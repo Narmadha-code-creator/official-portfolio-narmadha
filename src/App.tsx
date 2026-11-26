@@ -1,66 +1,67 @@
-import React, { useState } from 'react';
-import { CinematicIntro } from './components/CinematicIntro';
+import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
-import { HeroSection } from './components/HeroSection';
-import { FireworksPlayground } from './components/FireworksPlayground';
-import { AIWishGenerator } from './components/AIWishGenerator';
-import { GreetingCardStudio } from './components/GreetingCardStudio';
-import { VideoStudio } from './components/VideoStudio';
-import { PhotoGreetingCreator } from './components/PhotoGreetingCreator';
-import { SurpriseGiftSection } from './components/SurpriseGiftSection';
-import { FestivalParade } from './components/FestivalParade';
-import { BlessingsWall } from './components/BlessingsWall';
-import { AudioPlayer } from './components/AudioPlayer';
+import { Hero } from './components/Hero';
+import { About } from './components/About';
+import { Skills } from './components/Skills';
+import { Projects } from './components/Projects';
+import { Achievements } from './components/Achievements';
+import { Experience } from './components/Experience';
+import { Education } from './components/Education';
+import { ResumeSection } from './components/ResumeSection';
+import { Contact } from './components/Contact';
 import { Footer } from './components/Footer';
+import { PhotoManagerModal } from './components/PhotoManagerModal';
+import { getSavedGalleryPhotos } from './data/galleryData';
+import { UploadedPhoto } from './types';
 
-export function App() {
-  const [showIntro, setShowIntro] = useState<boolean>(true);
+export const App: React.FC = () => {
+  const [isPhotoManagerOpen, setIsPhotoManagerOpen] = useState(false);
+  const [customPhotos, setCustomPhotos] = useState<UploadedPhoto[]>([]);
+
+  useEffect(() => {
+    // Load any saved photos from localStorage
+    const saved = getSavedGalleryPhotos();
+    // Only set non-default custom photos
+    const customOnly = saved.filter(p => p.id.startsWith('photo-') && !p.id.includes('hero') && !p.id.includes('bharat') && !p.id.includes('casyum') && !p.id.includes('trophy') && !p.id.includes('n8n'));
+    setCustomPhotos(customOnly);
+  }, []);
+
+  const handlePhotoAdded = (photo: UploadedPhoto) => {
+    setCustomPhotos(prev => [photo, ...prev]);
+  };
 
   return (
-    <div className="min-h-screen bg-[#070314] text-[#fbf7ee] selection:bg-amber-500 selection:text-purple-950 font-sans relative">
-      {/* Cinematic Fullscreen Introduction */}
-      {showIntro && <CinematicIntro onComplete={() => setShowIntro(false)} />}
+    <div className="min-h-screen bg-lavender-50 font-sans text-slate-800 flex flex-col selection:bg-purple-brand selection:text-white">
+      {/* Navigation Bar */}
+      <Navbar onOpenPhotoManager={() => setIsPhotoManagerOpen(true)} />
 
-      {/* Main Website Experience */}
-      <div className={showIntro ? 'hidden' : 'block'}>
-        {/* Navigation Bar */}
-        <Navbar onReplayIntro={() => setShowIntro(true)} />
+      {/* Main Content Sections */}
+      <main className="flex-grow">
+        <Hero onOpenPhotoManager={() => setIsPhotoManagerOpen(true)} />
+        <About />
+        <Skills />
+        <Projects />
+        <Achievements
+          customPhotos={customPhotos}
+          onOpenPhotoManager={() => setIsPhotoManagerOpen(true)}
+        />
+        <Experience />
+        <Education />
+        <ResumeSection />
+        <Contact />
+      </main>
 
-        {/* 1. 3D Magical Home Hero */}
-        <HeroSection />
+      {/* Footer */}
+      <Footer />
 
-        {/* 2. Interactive Fireworks Playground */}
-        <FireworksPlayground />
-
-        {/* 3. AI Diwali Wish Generator */}
-        <AIWishGenerator />
-
-        {/* 4. Magical Greeting Cards Studio (10 Templates) */}
-        <GreetingCardStudio />
-
-        {/* 5. Animated Diwali Video Studio (WebM Export) */}
-        <VideoStudio />
-
-        {/* 6. AI Diwali Photo Greeting Creator */}
-        <PhotoGreetingCreator />
-
-        {/* 7. Interactive 3D Gift Box & Popups */}
-        <SurpriseGiftSection />
-
-        {/* 8. Animated Diwali Festival Parade */}
-        <FestivalParade />
-
-        {/* 9. Share the Celebration & Blessings Wall */}
-        <BlessingsWall />
-
-        {/* 10. Grand Footer */}
-        <Footer />
-
-        {/* Ambient Festive Audio Player & Temple Bell */}
-        <AudioPlayer />
-      </div>
+      {/* Photo Management Modal */}
+      <PhotoManagerModal
+        isOpen={isPhotoManagerOpen}
+        onClose={() => setIsPhotoManagerOpen(false)}
+        onPhotoAdded={handlePhotoAdded}
+      />
     </div>
   );
-}
+};
 
 export default App;
